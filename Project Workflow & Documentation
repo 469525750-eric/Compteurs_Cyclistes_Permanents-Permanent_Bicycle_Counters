@@ -1,0 +1,18 @@
+urban-active-transport-monitoring/
+├── data/
+├── sql/
+│   ├── create_tables.sql
+│   ├── data_quality_checks.sql
+│   ├── aggregation.sql
+├── src/
+│   ├── data_validation.py
+│   ├── monitoring_engine.py
+│   ├── state_update.py
+├── notebooks/
+│   └── exploration.ipynb
+├── dashboard/
+│   └── monitoring_dashboard.twbx
+├── docs/
+│   ├── business_logic_diagram.png
+│   └── state_transition_diagram.png
+└── README.md
