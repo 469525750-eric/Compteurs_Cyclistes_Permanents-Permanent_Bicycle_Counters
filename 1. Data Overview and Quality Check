@@ -1,3 +1,60 @@
 # Step 1: Data Overview.
 # Step 2: SQL-based data quality rules and orchestrated execution using Python to support continuous monitoring.
 
+Part 2：进入 SQL 前，必须做的 Data Quality & Data Cleansing Checks
+
+A. Structural & Schema Checks（结构完整性）
+
+是否存在 NULL / missing：
+instance, agg_code, periode, volume
+
+agg_code 是否只包含预期值：
+{f, h, d, m, y}
+
+periode 是否可被一致解析为 timestamp / date
+
+目的：确保数据能进入 monitoring pipeline，而不是修业务逻辑。
+
+B. Grain Integrity Checks（粒度一致性）是否存在“重复事实”？
+
+(instance, direction, agg_code, periode) 是否唯一
+
+有重复 → 标记为 data quality issue, 不在 Python 里“悄悄 drop”
+这是公司最看重的一类 check。
+
+C. Temporal Coverage Checks（时间覆盖）不对齐时间轴，只做事实识别：
+
+每个 instance：
+最早 periode, 最晚 periode
+
+是否存在异常长 gap（例如 > N 小时）
+
+用于：
+冷启动识别, 数据缺失标记（不是异常）
+
+D. Value Sanity Checks（数值合理性）不做统计建模，只做物理不可能检查：
+
+volume < 0 ❌
+volume = 0 是否连续异常长时间
+vitesse <= 0 或极端值（如 > 60 km/h）
+👉 这是 data quality，不是 anomaly detection。
+
+E. Cross-Dataset Alignment Checks（与施工数据的可对齐性）
+
+在 SQL 至少要验证：
+
+construction dataset 是否包含：
+可解析时间范围
+可定位到 street segment
+cycling sensors 是否能：
+spatially join 到 street / buffer
+只验证“能不能 join”，不解释结果。
+
+F. Explicit Non-Cleansing Decisions（非常加分）
+
+应该明确写出刻意不做的事：
+
+不插值填补缺失时间
+不强制对齐 instance 时间轴
+不删除低流量记录
+📌 这体现的是 design awareness，不是偷懒。
